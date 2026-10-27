@@ -1,0 +1,27 @@
+{
+  "name": "alab-website",
+  "private": true,
+  "version": "1.0.0",
+  "description": "ALAB Eco Briquettes — Waste to Warmth. Website with customer ratings & feedback (React + Node.js, Vercel + Supabase).",
+  "type": "module",
+  "engines": {
+    "node": ">=18.18"
+  },
+  "scripts": {
+    "dev": "node server/dev.js",
+    "build": "vite build",
+    "start": "npm run build && node server/dev.js --prod",
+    "preview": "node server/dev.js --prod"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "express": "^4.21.1",
+    "vite": "^5.4.11"
+  }
+}
