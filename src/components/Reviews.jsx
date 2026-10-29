@@ -62,6 +62,14 @@ function StarInput({ value, onChange, error }) {
           </button>
         ))}
       </div>
+      <div className={`flame-meter r${shown}`} aria-hidden="true">
+        <svg viewBox="0 0 40 46">
+          <defs><linearGradient id="fmG" x1="20" y1="2" x2="20" y2="45" gradientUnits="userSpaceOnUse"><stop stopColor="#FFE9B5" /><stop offset=".5" stopColor="#FF9A3C" /><stop offset="1" stopColor="#E2541E" /></linearGradient></defs>
+          <path className="fm-out" d="M20 2c6 8 14 13 14 25a14 14 0 01-28 0c0-7 4-11 7-16 2 4 4 7 7 7 0-7-3-11 0-16z" fill="url(#fmG)" />
+          <path className="fm-in" d="M20 24c3 4 6 6 6 11a6 6 0 01-12 0c0-4 3-6 6-11z" fill="#FFF3D6" />
+        </svg>
+        <span>{['Cold', 'A little spark', 'Warming up', 'Nice and hot', 'Blazing', 'ALAB-level fire'][shown]}</span>
+      </div>
       <div className="star-label" aria-live="polite">{shown ? `${shown} / 5 · ${ratingWords[shown]}` : 'Tap a star to rate'}</div>
       {error && <div className="err">{error}</div>}
     </div>

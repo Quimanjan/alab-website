@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { CoconutArt } from './Art.jsx';
 import { Move, Refresh } from './Icons.jsx';
-import { burst } from '../lib/fx.js';
+import { burst, sfx } from '../lib/fx.js';
 
 /**
  * A draggable coconut with simple physics.
@@ -125,6 +125,7 @@ const Coconut = forwardRef(function Coconut({ arenaRef, targetRef, onLand, onOve
     if (!tl) return;
     if (reduced.current) { land(); return; }
     s.busy = true;
+    sfx('whoosh');
     cancelAnimationFrame(s.raf);
     setMoved(true);
     const from = { x: s.x, y: s.y, a: s.angle };
@@ -243,6 +244,7 @@ const Coconut = forwardRef(function Coconut({ arenaRef, targetRef, onLand, onOve
     const ms = Math.max(16, z.t - a.t);
     s.vx = Math.max(-60, Math.min(60, ((z.x - a.x) / ms) * 16.67));
     s.vy = Math.max(-60, Math.min(60, ((z.y - a.y) / ms) * 16.67));
+    if (Math.hypot(s.vx, s.vy) > 18) sfx('whoosh');
     launch();
   };
 

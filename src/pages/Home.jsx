@@ -5,7 +5,8 @@ import Grill from '../components/Grill.jsx';
 import StoryScroll from '../components/StoryScroll.jsx';
 import BudgetCalc from '../components/BudgetCalc.jsx';
 import CountUp from '../components/fx/CountUp.jsx';
-import { burstFrom, toast } from '../lib/fx.js';
+import { burstFrom, sfx, toast } from '../lib/fx.js';
+import Briquette3D from '../components/Briquette3D.jsx';
 import { BriquetteArt } from '../components/Art.jsx';
 import { Arrow, Check, Leaf, featureIcon } from '../components/Icons.jsx';
 import { Head, Reveal } from '../components/UI.jsx';
@@ -70,6 +71,7 @@ function Hero() {
 
   const onLand = useCallback(() => {
     setLit(true);
+    sfx('sizzle');
     const n = (mineRef.current += 1);
     setMine(n);
     if (n === 1) toast('Waste to warmth! That shell would have been thrown away.');
@@ -110,7 +112,7 @@ function Hero() {
           </div>
         </div>
         <div className="visual">
-          <div className="img">
+          <div className="img tilt">
             <img src="/images/hero-logo-scene.jpg" alt="ALAB logo surrounded by charcoal, coconut shells and rice husk" width="720" height="716" fetchpriority="high" />
           </div>
           <div className="float">
@@ -181,14 +183,13 @@ function Showcase() {
       <Reveal>
         <Head
           eyebrow="Product showcase"
-          title={<>The <em>briquette,</em> up close.</>}
-          side="One briquette, three pack sizes — for the home kalan, the BBQ stall, and the samgyupsalan."
+          title={<>Spin it. <em>Heat it.</em></>}
+          side="A live 3D ALAB briquette — drag to turn it and run your cursor across it to watch it glow. One briquette, three pack sizes."
         />
       </Reveal>
       <div className="product">
-        <Reveal className="pimg tilt">
-          <img src="/images/briquettes-dark.jpg" alt="Actual ALAB charcoal briquettes — solid cylinders with a center air hole" loading="lazy" />
-          <span className="chip lbl">Actual ALAB briquettes</span>
+        <Reveal className="pimg b3d-wrap">
+          <Briquette3D />
         </Reveal>
         <Reveal className="card pcard" delay={100}>
           <span className="eyebrow">ALAB Charcoal Briquettes</span>

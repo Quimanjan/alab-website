@@ -23,3 +23,8 @@ export function inferno() {
 export function toast(message) {
   window.dispatchEvent(new CustomEvent('alab:toast', { detail: { message } }));
 }
+
+/** One-shot sound effect; only plays if the campfire sound is switched on. */
+export function sfx(type) {
+  window.dispatchEvent(new CustomEvent('alab:sfx', { detail: { type } }));
+}

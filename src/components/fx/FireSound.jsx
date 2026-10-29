@@ -70,6 +70,39 @@ export default function FireSound() {
 
   useEffect(() => () => stop(), []);
 
+  // One-shot effects: "whoosh" (throw), "sizzle" (lands on the grill), "ignite" (big flare)
+  useEffect(() => {
+    const play = (e) => {
+      const a = audio.current;
+      if (!a) return;
+      const { ctx, master } = a;
+      const type = e.detail?.type;
+      const dur = type === 'whoosh' ? 0.45 : type === 'ignite' ? 1.6 : 1.1;
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const f = ctx.createBiquadFilter();
+      const g = ctx.createGain();
+      const now = ctx.currentTime;
+      if (type === 'whoosh') {
+        f.type = 'bandpass'; f.Q.value = 1.2;
+        f.frequency.setValueAtTime(300, now); f.frequency.exponentialRampToValueAtTime(2400, now + dur);
+        g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(0.5, now + 0.12); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      } else if (type === 'ignite') {
+        f.type = 'lowpass'; f.frequency.setValueAtTime(200, now); f.frequency.exponentialRampToValueAtTime(3000, now + 0.25); f.frequency.exponentialRampToValueAtTime(500, now + dur);
+        g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(0.9, now + 0.08); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      } else {
+        f.type = 'highpass'; f.frequency.value = 3200;
+        g.gain.setValueAtTime(0.35, now); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      }
+      src.connect(f).connect(g).connect(master);
+      src.start();
+    };
+    window.addEventListener('alab:sfx', play);
+    return () => window.removeEventListener('alab:sfx', play);
+  }, []);
+
   const toggle = () => {
     if (on) stop(); else start();
     setOn(!on);

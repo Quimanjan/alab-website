@@ -6,6 +6,8 @@ import EmberField from './fx/EmberField.jsx';
 import ScrollProgress from './fx/ScrollProgress.jsx';
 import FireSound from './fx/FireSound.jsx';
 import useInteractiveFx from './fx/useInteractiveFx.js';
+import Intro from './fx/Intro.jsx';
+import FireWipe from './fx/FireWipe.jsx';
 
 const links = [
   { to: '/', label: 'Home', end: true },
@@ -56,6 +58,19 @@ export default function Layout() {
     window.scrollTo(0, 0);
   }, [pathname, hash]);
 
+  // Anonymous page-view tracking (feeds the admin dashboard).
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        fetch('/api/track', {
+          method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: pathname, referrer: document.referrer }),
+        }).catch(() => {});
+      } catch { /* ignore */ }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [pathname]);
+
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
     window.addEventListener('keydown', onKey);
@@ -105,7 +120,9 @@ export default function Layout() {
 
       <Footer />
       <ScrollProgress />
+      <FireWipe />
       <EmberField />
+      <Intro />
     </>
   );
 }
@@ -151,7 +168,7 @@ function Footer() {
           </div>
         </div>
         <p className="big-word" aria-hidden="true">ALAB</p>
-        <p className="secret">Psst — type <kbd>a</kbd><kbd>l</kbd><kbd>a</kbd><kbd>b</kbd> anywhere on the site.</p>
+        <p className="secret">Psst — type <kbd>a</kbd><kbd>l</kbd><kbd>a</kbd><kbd>b</kbd> anywhere on the site. · <Link to="/admin" className="admin-link">Admin</Link></p>
         <div className="fbot">
           <span>© {new Date().getFullYear()} ALAB Eco Briquettes. All rights reserved.</span>
           <span>A business plan by BS Entrepreneurship students · City College of San Jose del Monte</span>

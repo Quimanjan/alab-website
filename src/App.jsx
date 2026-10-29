@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
@@ -10,6 +10,8 @@ import BusinessPlan from './pages/BusinessPlan.jsx';
 import Reviews from './pages/Reviews.jsx';
 import Visit from './pages/Visit.jsx';
 import NotFound from './pages/NotFound.jsx';
+
+const Admin = lazy(() => import('./admin/Admin.jsx'));
 
 const titles = {
   '/': 'ALAB Eco Briquettes — Waste to Warmth',
@@ -25,11 +27,13 @@ const titles = {
 export default function App() {
   const { pathname } = useLocation();
   useEffect(() => {
+    if (pathname.startsWith('/admin')) return;
     document.title = titles[pathname] || 'Page not found — ALAB Eco Briquettes';
   }, [pathname]);
 
   return (
     <Routes>
+      <Route path="admin/*" element={<Suspense fallback={<div className="adm-boot" />}><Admin /></Suspense>} />
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="products" element={<Products />} />

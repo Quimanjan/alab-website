@@ -21,6 +21,8 @@ function getSupabase() {
   return supabase;
 }
 
+export const getSupabaseClient = () => getSupabase();
+
 export function storeMode() {
   if (getSupabase()) return 'supabase';
   // On Vercel the filesystem is read-only, so the file store is for local dev only.
@@ -147,4 +149,84 @@ export async function incrementCounter(key) {
 export function hashIp(ip) {
   const salt = process.env.REVIEW_IP_SALT || 'alab-waste-to-warmth';
   return crypto.createHash('sha256').update(`${salt}:${ip}`).digest('hex').slice(0, 32);
+}
+
+// ---------- Page views (visitor analytics) ----------
+const VIEWS_FILE = path.join(process.cwd(), '.data', 'views.json');
+
+export async function insertView(row) {
+  const sb = getSupabase();
+  if (sb) {
+    const { error } = await sb.from('page_views').insert(row);
+    if (error) throw error;
+    return;
+  }
+  let rows = [];
+  try { rows = JSON.parse(await fs.readFile(VIEWS_FILE, 'utf8')); } catch { /* first view */ }
+  rows.push({ ...row, created_at: new Date().toISOString() });
+  await fs.mkdir(path.dirname(VIEWS_FILE), { recursive: true });
+  await fs.writeFile(VIEWS_FILE, JSON.stringify(rows));
+}
+
+/** Aggregated visitor stats for the last `days` days (Philippine time). */
+export async function viewStats(days) {
+  const sb = getSupabase();
+  if (sb) {
+    const { data, error } = await sb.rpc('admin_view_stats', { range_days: days });
+    if (error) throw error;
+    return data;
+  }
+  let rows = [];
+  try { rows = JSON.parse(await fs.readFile(VIEWS_FILE, 'utf8')); } catch { /* none */ }
+  const tz = 'Asia/Manila';
+  const dayKey = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(d));
+  const today = dayKey(Date.now());
+  const keys = [];
+  for (let i = days - 1; i >= 0; i--) keys.push(dayKey(Date.now() - i * 86400000));
+  const first = keys[0];
+  const prevStart = dayKey(Date.now() - (days * 2 - 1) * 86400000);
+  const inRange = rows.filter((r) => dayKey(r.created_at) >= first);
+  const prev = rows.filter((r) => { const k = dayKey(r.created_at); return k >= prevStart && k < first; });
+  const uniq = (list) => new Set(list.map((r) => r.visitor)).size;
+  const group = (list, key, limit) => Object.entries(list.reduce((a, r) => { const k = r[key] || 'Unknown'; a[k] = (a[k] || 0) + 1; return a; }, {}))
+    .map(([k, v]) => ({ [key === 'path' ? 'path' : key === 'device' ? 'device' : 'source']: k, views: v })).sort((a, b) => b.views - a.views).slice(0, limit);
+  return {
+    total_views: rows.length,
+    total_visitors: uniq(rows),
+    range_views: inRange.length,
+    range_visitors: uniq(inRange),
+    prev_views: prev.length,
+    prev_visitors: uniq(prev),
+    today_views: rows.filter((r) => dayKey(r.created_at) === today).length,
+    today_visitors: uniq(rows.filter((r) => dayKey(r.created_at) === today)),
+    daily: keys.map((k) => { const d = inRange.filter((r) => dayKey(r.created_at) === k); return { day: k, views: d.length, visitors: uniq(d) }; }),
+    pages: group(inRange, 'path', 8),
+    devices: group(inRange, 'device', 5),
+    referrers: group(inRange, 'referrer', 6),
+  };
+}
+
+/** All reviews (including hidden) for the admin dashboard. */
+export async function adminListReviews(limit = 200) {
+  const sb = getSupabase();
+  if (sb) {
+    const { data, error } = await sb.from('reviews').select('id, created_at, name, rating, comment, customer_type, pack_size, is_visible').order('created_at', { ascending: false }).limit(limit);
+    if (error) throw error;
+    return data;
+  }
+  const rows = await readFileStore();
+  return rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, limit)
+    .map(({ ip_hash, ...r }) => ({ ...r, is_visible: r.is_visible !== false }));
+}
+
+export async function setReviewVisibility(id, visible) {
+  const sb = getSupabase();
+  if (sb) {
+    const { error } = await sb.from('reviews').update({ is_visible: visible }).eq('id', id);
+    if (error) throw error;
+    return;
+  }
+  const rows = await readFileStore();
+  const r = rows.find((x) => x.id === id);
+  if (r) { r.is_visible = visible; await writeFileStore(rows); }
 }

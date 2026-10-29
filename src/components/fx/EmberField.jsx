@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { prefersReducedMotion } from '../../lib/fx.js';
+import { prefersReducedMotion, sfx } from '../../lib/fx.js';
 
 /**
  * Full-screen canvas of glowing embers.
@@ -157,6 +157,7 @@ export default function EmberField() {
       if (typed === 'alab') {
         typed = '';
         onInferno();
+        sfx('ignite');
         onToast({ detail: { message: 'Alab means flame. You found the secret fire!' } });
       }
     };
