@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Donut, HBars, Legend, PageHero, Reveal, chartColors } from '../components/UI.jsx';
+import CountUp from '../components/fx/CountUp.jsx';
 import {
   actionPlan, company, compensation, competitors, costs, credits, demandSupply, differentiators, distribution, facilities,
   industry, materials, orderFlow, personnel, peso, policies, prices, priceComparison, product, projectedSales, promotion,
@@ -79,7 +80,7 @@ export default function BusinessPlan() {
             <h2 className="title">Industry analysis</h2>
             <p className="lead">Industry: <b style={{ color: 'var(--cream)' }}>{industry.definition}</b>.</p>
             <div className="statrow" style={{ marginTop: 22 }}>
-              {industry.stats.map((s) => <div className="card stat" key={s.value}><b>{s.value}</b><span>{s.label}</span></div>)}
+              {industry.stats.map((s) => <div className="card stat tilt" key={s.value}><CountUp as="b" value={s.value} /><span>{s.label}</span></div>)}
             </div>
             <h3 className="sub">Demand &amp; supply — 3-year outlook</h3>
             <div className="table-wrap">
@@ -136,7 +137,7 @@ export default function BusinessPlan() {
             <h2 className="title">Target market</h2>
             <p className="lead">{targetMarket.text}</p>
             <div className="statrow" style={{ marginTop: 22 }}>
-              {targetMarket.stats.map((s) => <div className="card stat" key={s.value}><b>{s.value}</b><span>{s.label}</span></div>)}
+              {targetMarket.stats.map((s) => <div className="card stat tilt" key={s.value}><CountUp as="b" value={s.value} /><span>{s.label}</span></div>)}
             </div>
             <h3 className="sub">Market segmentation <span className="mute" style={{ fontSize: 16 }}>· based on {survey.respondents} respondents</span></h3>
             <div className="grid-2">

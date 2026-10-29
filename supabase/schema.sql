@@ -22,3 +22,26 @@ create index if not exists reviews_ip_hash_idx on public.reviews (ip_hash, creat
 -- only the Node.js API (using the service_role key) can read and write.
 alter table public.reviews enable row level security;
 revoke all on public.reviews from anon, authenticated;
+
+-- ── Fun counter: coconuts visitors have thrown on the website's grill ──
+create table if not exists public.site_counters (
+  key   text primary key,
+  value bigint not null default 0
+);
+insert into public.site_counters (key, value) values ('coconuts_grilled', 0) on conflict (key) do nothing;
+alter table public.site_counters enable row level security;
+revoke all on public.site_counters from anon, authenticated;
+
+create or replace function public.increment_counter(counter_key text)
+returns bigint
+language sql
+security definer
+set search_path = public
+as $$
+  insert into public.site_counters (key, value) values (counter_key, 1)
+  on conflict (key) do update set value = public.site_counters.value + 1
+  returning value;
+$$;
+revoke all on function public.increment_counter(text) from public, anon, authenticated;
+grant execute on function public.increment_counter(text) to service_role;
+grant select, insert, update on public.site_counters to service_role;

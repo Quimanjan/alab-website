@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Box, Check, Coin, Leaf, Recycle, Store, Truck, Users } from '../components/Icons.jsx';
 import { Head, PageHero, Reveal } from '../components/UI.jsx';
+import BudgetCalc from '../components/BudgetCalc.jsx';
 import { company, differentiators, distribution, features, priceComparison, prices, product } from '../data/plan.js';
 import { featureIcon } from '../components/Icons.jsx';
 
@@ -52,7 +53,7 @@ export default function Products() {
             {features.map((f, i) => {
               const Icon = featureIcon[f.key];
               return (
-                <Reveal key={f.key} delay={i * 70} className="card glow fc">
+                <Reveal key={f.key} delay={i * 70} className="card glow fc tilt">
                   <div className={`ic${i > 1 ? ' leaf' : ''}`}><Icon size={26} /></div>
                   <h3>{f.title}</h3>
                   <p>{f.text}</p>
@@ -87,6 +88,11 @@ export default function Products() {
           <p className="mute" style={{ fontSize: 14, marginTop: 18 }}>
             This website is for product information and customer feedback only. To buy, see <Link to="/visit" style={{ color: 'var(--gold)' }}>where to buy</Link>.
           </p>
+        </section>
+
+        <section className="block" id="calculator">
+          <Reveal><Head eyebrow="Budget planner" title={<>Stretch every <em>peso.</em></>} side="Slide to your monthly charcoal budget to see the pack mix that gets you the most kilos." /></Reveal>
+          <Reveal><BudgetCalc /></Reveal>
         </section>
 
         {/* Price comparison */}

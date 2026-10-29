@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { burst, burstFrom } from '../lib/fx.js';
 import { Star } from './Icons.jsx';
 import { Stars } from './UI.jsx';
 import { postReview, ratingWords, timeAgo } from '../lib/reviews.js';
@@ -55,7 +56,7 @@ function StarInput({ value, onChange, error }) {
             onMouseEnter={() => setHover(n)}
             onFocus={() => setHover(n)}
             onBlur={() => setHover(0)}
-            onClick={() => onChange(n)}
+            onClick={(e) => { onChange(n); const r = e.currentTarget.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, { count: 6 + n * 4, power: 0.5 + n * 0.12 }); }}
           >
             <Star size={26} filled={n <= shown} />
           </button>
@@ -74,6 +75,7 @@ export function ReviewForm({ onPosted }) {
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ type: '', msg: '' });
   const [busy, setBusy] = useState(false);
+  const submitRef = useRef(null);
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
 
   const submit = async (e) => {
@@ -89,6 +91,7 @@ export function ReviewForm({ onPosted }) {
       const review = await postReview({ ...f, rating: Number(f.rating) });
       setF(empty);
       setStatus({ type: 'ok', msg: 'Salamat! Your rating and feedback were posted. They help us make ALAB better.' });
+      burstFrom(submitRef.current, { count: 90, power: 1.5 });
       onPosted?.(review);
     } catch (err) {
       setErrors(err.fields || {});
@@ -149,7 +152,7 @@ export function ReviewForm({ onPosted }) {
       {status.msg && <div className={`notice ${status.type}`} role="status">{status.msg}</div>}
 
       <div>
-        <button className="btn fire" type="submit" disabled={busy}>{busy ? 'Posting…' : 'Post my rating'}</button>
+        <button ref={submitRef} className="btn fire" type="submit" disabled={busy}>{busy ? 'Posting…' : 'Post my rating'}</button>
         <p className="mute" style={{ fontSize: 13, marginTop: 12, lineHeight: 1.6 }}>
           Reviews appear publicly on this page. Please don’t include phone numbers or addresses.
         </p>

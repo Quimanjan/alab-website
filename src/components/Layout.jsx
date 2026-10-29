@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Close, Menu } from './Icons.jsx';
 import { site } from '../data/site.js';
+import EmberField from './fx/EmberField.jsx';
+import ScrollProgress from './fx/ScrollProgress.jsx';
+import FireSound from './fx/FireSound.jsx';
+import useInteractiveFx from './fx/useInteractiveFx.js';
 
 const links = [
   { to: '/', label: 'Home', end: true },
@@ -41,6 +45,7 @@ export default function Layout() {
   const [open, setOpen] = useState(false);
   const { pathname, hash } = useLocation();
   const scrolled = useScrolled();
+  useInteractiveFx();
 
   useEffect(() => {
     setOpen(false);
@@ -72,6 +77,7 @@ export default function Layout() {
             ))}
           </nav>
           <div className="nav-cta">
+            <FireSound />
             <Link to="/reviews#rate" className="btn fire sm">Rate ALAB</Link>
             <button
               type="button"
@@ -93,11 +99,13 @@ export default function Layout() {
         </div>
       </header>
 
-      <main id="main">
+      <main id="main" key={pathname} className="page-enter">
         <Outlet />
       </main>
 
       <Footer />
+      <ScrollProgress />
+      <EmberField />
     </>
   );
 }
@@ -143,6 +151,7 @@ function Footer() {
           </div>
         </div>
         <p className="big-word" aria-hidden="true">ALAB</p>
+        <p className="secret">Psst — type <kbd>a</kbd><kbd>l</kbd><kbd>a</kbd><kbd>b</kbd> anywhere on the site.</p>
         <div className="fbot">
           <span>© {new Date().getFullYear()} ALAB Eco Briquettes. All rights reserved.</span>
           <span>A business plan by BS Entrepreneurship students · City College of San Jose del Monte</span>

@@ -113,6 +113,37 @@ export async function insertReview(review) {
   return toPublic(row);
 }
 
+// ---------- Site counters (e.g. coconuts thrown on the grill) ----------
+const COUNTER_FILE = path.join(process.cwd(), '.data', 'counters.json');
+
+async function readCounters() {
+  try { return JSON.parse(await fs.readFile(COUNTER_FILE, 'utf8')); } catch { return {}; }
+}
+
+export async function getCounter(key) {
+  const sb = getSupabase();
+  if (sb) {
+    const { data, error } = await sb.from('site_counters').select('value').eq('key', key).maybeSingle();
+    if (error) throw error;
+    return Number(data?.value || 0);
+  }
+  return Number((await readCounters())[key] || 0);
+}
+
+export async function incrementCounter(key) {
+  const sb = getSupabase();
+  if (sb) {
+    const { data, error } = await sb.rpc('increment_counter', { counter_key: key });
+    if (error) throw error;
+    return Number(data || 0);
+  }
+  const all = await readCounters();
+  all[key] = Number(all[key] || 0) + 1;
+  await fs.mkdir(path.dirname(COUNTER_FILE), { recursive: true });
+  await fs.writeFile(COUNTER_FILE, JSON.stringify(all, null, 2));
+  return all[key];
+}
+
 export function hashIp(ip) {
   const salt = process.env.REVIEW_IP_SALT || 'alab-waste-to-warmth';
   return crypto.createHash('sha256').update(`${salt}:${ip}`).digest('hex').slice(0, 32);

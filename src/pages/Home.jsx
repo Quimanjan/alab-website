@@ -1,7 +1,12 @@
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Coconut from '../components/Coconut.jsx';
-import { BriquetteArt, CoconutArt, DrumArt, MoldArt } from '../components/Art.jsx';
+import Grill from '../components/Grill.jsx';
+import StoryScroll from '../components/StoryScroll.jsx';
+import BudgetCalc from '../components/BudgetCalc.jsx';
+import CountUp from '../components/fx/CountUp.jsx';
+import { burstFrom, toast } from '../lib/fx.js';
+import { BriquetteArt } from '../components/Art.jsx';
 import { Arrow, Check, Leaf, featureIcon } from '../components/Icons.jsx';
 import { Head, Reveal } from '../components/UI.jsx';
 import { RatingSummary, ReviewCard } from '../components/Reviews.jsx';
@@ -13,10 +18,19 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <Marquee />
       <div className="wrap">
         <Why />
-        <ProcessStrip />
+      </div>
+      <StoryScroll />
+      <div className="wrap">
         <Showcase />
+        <section className="block" id="calculator">
+          <Reveal>
+            <Head eyebrow="Plan your fire" title={<>Your budget, <em>maximized.</em></>} side="Bigger packs cost less per kilo. Find the mix that stretches your monthly charcoal money the furthest." />
+          </Reveal>
+          <Reveal><BudgetCalc /></Reveal>
+        </section>
       </div>
       <div className="wrap"><SustainBanner /></div>
       <div className="wrap">
@@ -27,16 +41,59 @@ export default function Home() {
   );
 }
 
+function useCoconutCounter() {
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/counter').then((r) => (r.ok ? r.json() : null)).then((d) => { if (alive && d) setCount(d.coconuts); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+  const add = useCallback(() => {
+    setCount((c) => (c == null ? c : c + 1));
+    fetch('/api/counter', { method: 'POST' }).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && !d.throttled) setCount(d.coconuts); }).catch(() => {});
+  }, []);
+  return [count, add];
+}
+
+const headline = [['Fire,', ''], ['refined.', 'ember'], ['|'], ['Smoke,', ''], ['reduced.', '']];
+
 function Hero() {
   const arena = useRef(null);
+  const grillRef = useRef(null);
+  const cocoRef = useRef(null);
+  const [lit, setLit] = useState(false);
+  const [over, setOver] = useState(false);
+  const [mine, setMine] = useState(0);
+  const [count, addCount] = useCoconutCounter();
+  const litTimer = useRef(0);
+  const mineRef = useRef(0);
+
+  const onLand = useCallback(() => {
+    setLit(true);
+    const n = (mineRef.current += 1);
+    setMine(n);
+    if (n === 1) toast('Waste to warmth! That shell would have been thrown away.');
+    if (n === 5) toast('5 coconuts! You’re a natural ihaw-ihaw master.');
+    if (n === 10) toast('10 shells saved. The planet thanks you.');
+    addCount();
+    burstFrom(grillRef.current, { count: 70, power: 1.4, spread: Math.PI * 0.9 });
+    clearTimeout(litTimer.current);
+    litTimer.current = setTimeout(() => setLit(false), 5200);
+  }, [addCount]);
+
+  useEffect(() => () => clearTimeout(litTimer.current), []);
+
   return (
-    <section className="hero" ref={arena}>
+    <section className={`hero${lit ? ' is-lit' : ''}`} ref={arena}>
       <div className="wrap hero-grid">
         <div>
           <span className="eyebrow">Coconut shell + rice husk charcoal</span>
-          <h1>
-            Fire, <span className="ember">refined.</span>
-            <br />Smoke, reduced.
+          <h1 aria-label="Fire, refined. Smoke, reduced.">
+            {headline.map(([word, cls], i) =>
+              word === '|' ? <br key={i} /> : (
+                <span key={i} aria-hidden="true"><span className={`hw ${cls}`} style={{ animationDelay: `${120 + i * 110}ms` }}>{word}</span>{' '}</span>
+              ),
+            )}
           </h1>
           <p className="lead">
             Eco-friendly charcoal briquettes carbonized from coconut shells and rice husks, bound with natural cassava starch.
@@ -47,8 +104,8 @@ function Hero() {
             <Link to="/process" className="btn line">See how it’s made</Link>
           </div>
           <div className="trust">
-            <div className="tpill"><b>₱60</b><span>per kg<br />starting price</span></div>
-            <div className="tpill"><b>100%</b><span>agricultural<br />waste</span></div>
+            <div className="tpill"><CountUp as="b" value="₱60" /><span>per kg<br />starting price</span></div>
+            <div className="tpill"><CountUp as="b" value="100%" /><span>agricultural<br />waste</span></div>
             <div className="tpill"><b>0</b><span>chemical<br />binders</span></div>
           </div>
         </div>
@@ -57,14 +114,35 @@ function Hero() {
             <img src="/images/hero-logo-scene.jpg" alt="ALAB logo surrounded by charcoal, coconut shells and rice husk" width="720" height="716" fetchpriority="high" />
           </div>
           <div className="float">
-            <b>76.9%</b>
+            <CountUp as="b" value="76.9%" />
             <span>of 203 locals surveyed would switch to ALAB for a longer burn</span>
           </div>
           <span className="chip leaf badge-eco"><Leaf size={15} /> Natural · Low smoke · Local</span>
-          <Coconut arenaRef={arena} />
+          <Grill ref={grillRef} lit={lit} over={over} onClick={() => cocoRef.current?.throwToGrill()} />
+          <Coconut ref={cocoRef} arenaRef={arena} targetRef={grillRef} onLand={onLand} onOver={setOver} />
         </div>
       </div>
+      <div className="wrap">
+        <p className="coco-counter" aria-live="polite">
+          <span className="dot" />
+          <span>
+            {count != null
+              ? <><b>{count.toLocaleString()}</b> coconuts turned into warmth by visitors{mine ? <> · <b>{mine}</b> by you</> : null}</>
+              : mine ? <><b>{mine}</b> coconuts turned into warmth by you</> : <>Throw the coconut on the grill — every shell counts</>}
+          </span>
+        </p>
+      </div>
     </section>
+  );
+}
+
+function Marquee() {
+  const items = ['Waste to Warmth', 'Coconut shell', 'Rice husk', 'Cassava starch binder', 'Long burn', 'High heat', 'Low smoke', 'Made in Brgy. Citrus', 'No chemicals'];
+  const row = items.map((t) => <span key={t}>{t}<i aria-hidden="true">✦</i></span>);
+  return (
+    <div className="marquee" aria-label={items.join(', ')}>
+      <div className="marquee-track" aria-hidden="true">{row}{row}</div>
+    </div>
   );
 }
 
@@ -82,7 +160,7 @@ function Why() {
         {features.map((f, i) => {
           const Icon = featureIcon[f.key];
           return (
-            <Reveal key={f.key} delay={i * 80} className="card glow fc">
+            <Reveal key={f.key} delay={i * 80} className="card glow fc tilt">
               <span className="n">0{i + 1}</span>
               <div className={`ic${i > 1 ? ' leaf' : ''}`}><Icon size={26} /></div>
               <h3>{f.title}</h3>
@@ -91,37 +169,6 @@ function Why() {
           );
         })}
       </div>
-    </section>
-  );
-}
-
-function ProcessStrip() {
-  const steps = [
-    { art: <CoconutArt className="mini-coco" />, t: 'Collect', d: 'Shells from coconut vendors, husks from rice farmers.' },
-    { art: <DrumArt />, t: 'Carbonize', d: 'Low-oxygen burn in a sealed carbonizer drum.' },
-    { art: <MoldArt />, t: 'Bind & mold', d: 'Ground charcoal + cassava starch, pressed into solid briquettes.' },
-    { art: <BriquetteArt size={104} />, t: 'Dry & test', d: 'Sun-dried on bilao, burn-tested and weighed before packing.' },
-  ];
-  return (
-    <section className="block">
-      <Reveal>
-        <Head
-          eyebrow="Waste to Warmth"
-          title={<>From shell <em>to flame.</em></>}
-          side={<>Every briquette starts as something people throw away. <Link to="/process" style={{ color: 'var(--gold)' }}>See the full process →</Link></>}
-        />
-      </Reveal>
-      <Reveal className="process">
-        {steps.map((s, i) => (
-          <div className="step" key={s.t}>
-            <div className="vis">{s.art}</div>
-            <span className="num">Step {i + 1}</span>
-            <h4>{s.t}</h4>
-            <p>{s.d}</p>
-          </div>
-        ))}
-      </Reveal>
-      <style>{'.mini-coco{width:118px;height:118px;filter:drop-shadow(0 16px 20px rgba(0,0,0,.6))}'}</style>
     </section>
   );
 }
@@ -139,7 +186,7 @@ function Showcase() {
         />
       </Reveal>
       <div className="product">
-        <Reveal className="pimg">
+        <Reveal className="pimg tilt">
           <img src="/images/briquettes-dark.jpg" alt="Actual ALAB charcoal briquettes — solid cylinders with a center air hole" loading="lazy" />
           <span className="chip lbl">Actual ALAB briquettes</span>
         </Reveal>
@@ -170,7 +217,7 @@ function Showcase() {
           </ul>
           <div className="btn-row" style={{ marginTop: 'auto' }}>
             <Link to="/visit" className="btn fire" style={{ flex: 1 }}>Where to buy</Link>
-            <Link to="/products" className="btn line">Full details</Link>
+            <a href="#calculator" className="btn line">Plan my budget</a>
           </div>
         </Reveal>
       </div>
@@ -198,9 +245,9 @@ function SustainBanner() {
           <Link to="/sustainability" className="btn line" style={{ marginTop: 10 }}>Our impact <Arrow size={16} /></Link>
         </div>
         <div style={{ display: 'grid', gap: 14 }}>
-          <div className="glass sc"><b>76.9%</b><span>of locals surveyed would switch to ALAB for a longer burn</span></div>
-          <div className="glass sc"><b>46.3%</b><span>rank burn time as the #1 factor when buying charcoal</span></div>
-          <div className="glass sc"><b>80.8%</b><span>use charcoal at least once every week</span></div>
+          <div className="glass sc"><CountUp as="b" value="76.9%" /><span>of locals surveyed would switch to ALAB for a longer burn</span></div>
+          <div className="glass sc"><CountUp as="b" value="46.3%" /><span>rank burn time as the #1 factor when buying charcoal</span></div>
+          <div className="glass sc"><CountUp as="b" value="80.8%" /><span>use charcoal at least once every week</span></div>
         </div>
       </div>
       <div className="grid-3" style={{ marginTop: 36 }}>
