@@ -680,3 +680,7 @@ main, footer.site, .topbar { position: relative; z-index: 1; }
   .b3d-temp { grid-template-columns: auto 80px auto; }
 }
 .secret .admin-link { color: #8a7e73; text-decoration: none; } .secret .admin-link:hover { color: var(--amber); }
+/* Admin log in button (nav) */
+.btn.login-btn { background: rgba(255, 255, 255, 0.04); color: var(--cream); border: 1px solid var(--line2); box-shadow: none; }
+.btn.login-btn:hover { border-color: var(--amber); color: var(--amber); background: rgba(242, 140, 56, 0.08); }
+.mobile-menu .btn.login-btn { margin-top: 10px; }

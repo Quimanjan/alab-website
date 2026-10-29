@@ -93,6 +93,7 @@ export default function Layout() {
           </nav>
           <div className="nav-cta">
             <FireSound />
+            <Link to="/admin" className="btn login-btn sm">Log in</Link>
             <Link to="/reviews#rate" className="btn fire sm">Rate ALAB</Link>
             <button
               type="button"
@@ -111,6 +112,7 @@ export default function Layout() {
             <NavLink key={l.to} to={l.to} end={l.end} tabIndex={open ? 0 : -1}>{l.label}</NavLink>
           ))}
           <Link to="/reviews#rate" className="btn fire" tabIndex={open ? 0 : -1}>Rate ALAB</Link>
+          <Link to="/admin" className="btn login-btn" tabIndex={open ? 0 : -1}>Admin log in</Link>
         </div>
       </header>
 
