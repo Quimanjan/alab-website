@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     if (p.startsWith('/admin')) return res.status(204).end();
     const fwd = req.headers['x-forwarded-for'];
     const ip = (typeof fwd === 'string' && fwd.split(',')[0].trim()) || req.socket?.remoteAddress || 'unknown';
-    await insertView({ path: p, visitor: hashIp(ip + '|' + ua), device: device(ua), referrer: source(body.referrer, req.headers.host) });
+    await insertView({ path: p, visitor: hashIp(ip + '|' + ua), device: device(ua), referrer: String(body.ref || '').toLowerCase() === 'qr' ? 'QR code' : source(body.referrer, req.headers.host) });
     return res.status(204).end();
   } catch (err) {
     console.error('[api/track]', err);

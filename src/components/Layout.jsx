@@ -64,7 +64,7 @@ export default function Layout() {
       try {
         fetch('/api/track', {
           method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: pathname, referrer: document.referrer }),
+          body: JSON.stringify({ path: pathname, referrer: document.referrer, ref: new URLSearchParams(window.location.search).get('ref') || '' }),
         }).catch(() => {});
       } catch { /* ignore */ }
     }, 400);
