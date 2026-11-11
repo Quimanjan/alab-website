@@ -155,6 +155,7 @@ function Footer() {
             <ul>
               <li><Link to="/reviews">Ratings &amp; feedback</Link></li>
               <li><Link to="/reviews#rate">Leave a review</Link></li>
+              {site.channels.map((c) => <li key={c.name}><a href={c.url} target="_blank" rel="noreferrer">Order on {c.name} ↗</a></li>)}
               <li><Link to="/visit">Where to buy</Link></li>
               <li><Link to="/visit#faq">FAQs</Link></li>
             </ul>

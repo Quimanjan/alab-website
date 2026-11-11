@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { site } from '../data/site.js';
 import { Box, Check, Coin, Leaf, Recycle, Store, Truck, Users } from '../components/Icons.jsx';
 import { Head, PageHero, Reveal } from '../components/UI.jsx';
 import BudgetCalc from '../components/BudgetCalc.jsx';
@@ -191,8 +192,8 @@ export default function Products() {
             })}
           </div>
           <div className="btn-row" style={{ marginTop: 26 }}>
-            <Link to="/visit" className="btn fire">Visit &amp; where to buy</Link>
-            <Link to="/reviews#rate" className="btn line">Already tried it? Rate ALAB</Link>
+            {site.channels.map((c, i) => <a key={c.name} href={c.url} target="_blank" rel="noreferrer" className={`btn ${i === 0 ? 'fire' : 'line'}`}>Order on {c.name}</a>)}
+            <Link to="/visit" className="btn line">Visit &amp; where to buy</Link>
           </div>
         </section>
       </div>

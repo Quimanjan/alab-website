@@ -684,3 +684,8 @@ main, footer.site, .topbar { position: relative; z-index: 1; }
 .btn.login-btn { background: rgba(255, 255, 255, 0.04); color: var(--cream); border: 1px solid var(--line2); box-shadow: none; }
 .btn.login-btn:hover { border-color: var(--amber); color: var(--amber); background: rgba(242, 140, 56, 0.08); }
 .mobile-menu .btn.login-btn { margin-top: 10px; }
+/* Order buttons (TikTok / Facebook) */
+.order-links { display: flex; flex-wrap: wrap; gap: 12px; }
+.order-links.stack { flex-direction: column; align-items: stretch; }
+.order-links.stack .btn { width: 100%; }
+.faq p a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }

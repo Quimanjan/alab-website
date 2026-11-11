@@ -2,11 +2,12 @@ import { Link } from 'react-router-dom';
 import { Clock, Pin, Truck } from '../components/Icons.jsx';
 import { PageHero, Reveal, Head } from '../components/UI.jsx';
 import { Channels } from './Home.jsx';
+import OrderLinks from '../components/OrderLinks.jsx';
 import { distribution, orderFlow, prices, product } from '../data/plan.js';
 import { site } from '../data/site.js';
 
 const faqs = [
-  { q: 'Can I buy directly on this website?', a: 'Not yet — this website is for product information and customer ratings & feedback. To buy, message us on our social media pages, walk in at our production area in Brgy. Citrus, or look for ALAB at partner sari-sari stores and stalls.' },
+  { q: 'Can I buy directly on this website?', a: <>Not here — this website is for product information and customer ratings &amp; feedback. To buy, order on our <a href={site.channels[0].url} target="_blank" rel="noreferrer">TikTok</a> or <a href={site.channels[1].url} target="_blank" rel="noreferrer">Facebook</a>, walk in at our production area in Brgy. Citrus, or look for ALAB at partner sari-sari stores and stalls.</> },
   { q: 'What are ALAB briquettes made of?', a: `${product.ingredients.join(', ')}. No chemicals, no additives, and no binders other than natural cassava starch.` },
   { q: 'How much do they cost?', a: prices.map((p) => `${p.size} — ₱${p.price}${p.note ? ` (${p.note})` : ''}`).join(' · ') + '.' },
   { q: 'Do you deliver?', a: 'Yes — free delivery within 2 km for orders of 5 kg and up. For farther areas we use Lalamove or MoveIt. You can also pick up at our production area.' },
@@ -66,7 +67,12 @@ export default function Visit() {
               <Reveal key={d.title} delay={i * 70} className="card pad">
                 <span className="chip amber">{d.tag}</span>
                 <h3 className="serif" style={{ fontSize: 22, fontWeight: 500, margin: '18px 0 8px' }}>{d.title}</h3>
-                <p className="mute" style={{ margin: 0, lineHeight: 1.6, fontSize: 15 }}>{d.text}</p>
+                {d.tag === 'Online' ? (
+                  <>
+                    <p className="mute" style={{ margin: '0 0 16px', lineHeight: 1.6, fontSize: 15 }}>Order online on our TikTok and Facebook — tap to open.</p>
+                    <OrderLinks size="sm" className="stack" />
+                  </>
+                ) : <p className="mute" style={{ margin: 0, lineHeight: 1.6, fontSize: 15 }}>{d.text}</p>}
               </Reveal>
             ))}
           </div>
@@ -79,8 +85,9 @@ export default function Visit() {
               <span className="eyebrow" style={{ display: 'block', marginTop: 20 }}>How ordering works</span>
               <h2 className="title">Message us, <em>we’ll handle the rest.</em></h2>
               <p className="lead" style={{ marginTop: 18 }}>
-                Send an inquiry through our pages or walk in. We confirm the quantity, total, payment, and pickup or delivery — then prepare, quality-check, pack, and label your order.
+                Order on our TikTok or Facebook, or walk in. We confirm the quantity, total, payment, and pickup or delivery — then prepare, quality-check, pack, and label your order.
               </p>
+              <OrderLinks style={{ marginTop: 26 }} />
             </Reveal>
             <Reveal delay={80}>
               <ol className="numlist">{orderFlow.map((s) => <li key={s}><div><b>{s}</b></div></li>)}</ol>
