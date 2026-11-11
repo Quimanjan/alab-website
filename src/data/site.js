@@ -20,13 +20,10 @@ export const site = {
   email: '', // e.g. 'alabcharcoal@gmail.com'
   phone: '', // e.g. '0912 345 6789'
 
+  // Where customers can order
   channels: [
-    { name: 'Facebook Page', url: '', note: 'Product updates & inquiries' },
-    { name: 'Messenger', url: '', note: 'Fastest way to ask & order' },
-    { name: 'TikTok / TikTok Shop', url: '', note: 'Demos & promos' },
-    { name: 'Instagram', url: '', note: 'Photos & announcements' },
-    { name: 'Shopee', url: '', note: 'Online marketplace' },
-    { name: 'Lazada', url: '', note: 'Online marketplace' },
+    { name: 'TikTok', url: 'https://www.tiktok.com/@alab_charcoal?_r=1&_t=ZS-9B7BnmYd4YU', note: 'Order at @alab_charcoal' },
+    { name: 'Facebook', url: 'https://www.facebook.com/61596153753302/posts/122099106579538458/?app=fbl', note: 'Order & message us' },
   ],
 };
 

@@ -308,7 +308,7 @@ export function Channels() {
         <span className="eyebrow">Get your ALAB</span>
         <h2 className="title">Light it up <em>tonight.</em></h2>
         <p className="mute" style={{ lineHeight: 1.7, maxWidth: 470, margin: '18px 0 28px' }}>
-          Message us on our pages, walk in at {site.addressShort}, or ask your suki sari-sari store. Free delivery within 2 km on 5 kg packs; Lalamove / MoveIt for farther areas.
+          Order on our TikTok or Facebook, walk in at {site.addressShort}, or ask your suki sari-sari store. Free delivery within 2 km on 5 kg packs; Lalamove / MoveIt for farther areas.
         </p>
         <Link to="/visit" className="btn fire">Visit &amp; where to buy</Link>
       </div>
