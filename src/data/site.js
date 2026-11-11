@@ -23,7 +23,7 @@ export const site = {
   // Where customers can order
   channels: [
     { name: 'TikTok', url: 'https://www.tiktok.com/@alab_charcoal?_r=1&_t=ZS-9B7BnmYd4YU', note: 'Order at @alab_charcoal' },
-    { name: 'Facebook', url: 'https://www.facebook.com/61596153753302/posts/122099106579538458/?app=fbl', note: 'Order & message us' },
+    { name: 'Facebook', url: 'https://www.facebook.com/share/1CfPM3gnGi/', note: 'Order & message us' },
   ],
 };
 
